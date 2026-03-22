@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For You 💖</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* screens */
+.screen {
+  display: none;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.active { display: flex; }
+
+/* button */
+button {
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  background: pink;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+/* game */
+#gameArea {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+.star {
+  position: absolute;
+  font-size: 25px;
+}
+
+#player {
+  position: absolute;
+  bottom: 20px;
+  font-size: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* balloons */
+.balloon {
+  position: absolute;
+  bottom: -100px;
+  width: 40px;
+  height: 60px;
+  border-radius: 50%;
+  animation: rise 6s linear infinite;
+}
+@keyframes rise {
+  to { transform: translateY(-120vh); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- countdown -->
+<div id="s1" class="screen active">
+  <h1 id="count">3</h1>
+  <p>Wait for it...</p>
+</div>
+
+<!-- message -->
+<div id="s2" class="screen">
+  <p id="text"></p>
+  <button onclick="startGame()">Continue 💖</button>
+</div>
+
+<!-- game -->
+<div id="s3" class="screen">
+  <h2>Catch 5 Stars ⭐</h2>
+  <p id="score">0/5</p>
+  <div id="gameArea">
+    <div id="player">🧺</div>
+  </div>
+</div>
+
+<!-- final -->
+<div id="s4" class="screen">
+  <h1>🎉 HAPPY BIRTHDAY 🎂</h1>
+  <p>You are amazing 💕</p>
+</div>
+
+<script>
+let count = 3;
+let score = 0;
+
+/* countdown */
+let timer = setInterval(()=>{
+  count--;
+  document.getElementById("count").innerText = count;
+
+  if(count === 0){
+    clearInterval(timer);
+    show("s2");
+    typeText();
+  }
+},1000);
+
+/* show screen */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* typing */
+let msg = "You are one of the best people I know 💖";
+let i = 0;
+
+function typeText(){
+  let t = setInterval(()=>{
+    document.getElementById("text").innerHTML += msg[i];
+    i++;
+    if(i >= msg.length) clearInterval(t);
+  },40);
+}
+
+/* game */
+function startGame(){
+  show("s3");
+
+  let player = document.getElementById("player");
+
+  document.addEventListener("mousemove", e=>{
+    player.style.left = e.clientX + "px";
+  });
+
+  document.addEventListener("touchmove", e=>{
+    player.style.left = e.touches[0].clientX + "px";
+  });
+
+  let game = setInterval(()=>{
+    let star = document.createElement("div");
+    star.className = "star";
+    star.innerHTML = "⭐";
+    star.style.left = Math.random()*90 + "vw";
+    star.style.top = "0px";
+
+    document.getElementById("gameArea").appendChild(star);
+
+    let fall = setInterval(()=>{
+      let top = star.offsetTop;
+      star.style.top = top + 5 + "px";
+
+      let s = star.getBoundingClientRect();
+      let p = player.getBoundingClientRect();
+
+      if(
+        s.bottom >= p.top &&
+        s.left >= p.left &&
+        s.right <= p.right
+      ){
+        star.remove();
+        score++;
+        document.getElementById("score").innerText = score + "/5";
+
+        if(score === 5){
+          clearInterval(game);
+          finalScreen();
+        }
+      }
+    },20);
+
+    setTimeout(()=>{
+      star.remove();
+      clearInterval(fall);
+    },4000);
+
+  },800);
+}
+
+/* final */
+function finalScreen(){
+  show("s4");
+
+  for(let i=0;i<20;i++){
+    let b = document.createElement("div");
+    b.className = "balloon";
+    b.style.left = Math.random()*100 + "vw";
+    b.style.background = ["red","pink","yellow","blue"][Math.floor(Math.random()*4)];
+    document.body.appendChild(b);
+  }
+
+  new Audio("https://www.myinstants.com/media/sounds/tada-fanfare.mp3").play();
+}
+</script>
+
+</body>
+</html>
